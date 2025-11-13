@@ -4,4 +4,15 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  ssr: {
+    noExternal: ['@hexlet/chatbot-v2'],
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './vitest.setup.js',
+    pool: 'threads',
+    deps: {
+      inline: ['@hexlet/chatbot-v2'],
+    },
+  },
 })

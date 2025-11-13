@@ -1,1 +1,1 @@
-// Global test setup placeholder required by Hexlet project instructions.
+import '@testing-library/jest-dom/vitest'
