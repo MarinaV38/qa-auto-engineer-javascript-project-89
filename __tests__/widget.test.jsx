@@ -3,11 +3,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createRequire } from 'module'
 import steps from '../__fixtures__/basicSteps.js'
+import noWelcomeSteps from '../__fixtures__/noWelcomeSteps.js'
+import danglingSteps from '../__fixtures__/danglingSteps.js'
 
 const require = createRequire(import.meta.url)
 const WidgetModule = require('@hexlet/chatbot-v2')
 const Widget = WidgetModule.default ?? WidgetModule
-const renderWidget = () => render(Widget(steps))
+const renderWidget = (customSteps = steps) => render(Widget(customSteps))
 const getOpenChatButton = () =>
   screen.getAllByRole('button', { name: /Открыть Чат/i })[0]
 
@@ -58,5 +60,31 @@ describe('Flowbot widget', () => {
     ).toBeInTheDocument()
 
     window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView
+  })
+
+  it('не отображает пользовательские кнопки, если шаг welcome отсутствует', async () => {
+    const user = userEvent.setup()
+    renderWidget(noWelcomeSteps)
+
+    await user.click(getOpenChatButton())
+    expect(
+      screen.queryByRole('button', { name: /Невалидная кнопка/i }),
+    ).not.toBeInTheDocument()
+  })
+
+  it('оставляет текущий шаг, если nextStepId указывает на несуществующий шаг', async () => {
+    const user = userEvent.setup()
+    renderWidget(danglingSteps)
+
+    await user.click(getOpenChatButton())
+    const optionButton = await screen.findByRole('button', { name: /Продолжить/i })
+    await user.click(optionButton)
+
+    const responseMessages = screen
+      .getAllByText(/Продолжить/)
+      .filter((node) => node.tagName !== 'BUTTON')
+    expect(responseMessages.length).toBeGreaterThanOrEqual(1)
+
+    expect(optionButton).toBeEnabled()
   })
 })
