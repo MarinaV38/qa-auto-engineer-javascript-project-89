@@ -5,26 +5,30 @@ import { createRequire } from 'module'
 import steps from '../__fixtures__/basicSteps.js'
 import noWelcomeSteps from '../__fixtures__/noWelcomeSteps.js'
 import danglingSteps from '../__fixtures__/danglingSteps.js'
+import { WidgetPage } from './pageObjects/WidgetPage.js'
 
 const require = createRequire(import.meta.url)
 const WidgetModule = require('@hexlet/chatbot-v2')
 const Widget = WidgetModule.default ?? WidgetModule
-const renderWidget = (customSteps = steps) => render(Widget(customSteps))
-const getOpenChatButton = () =>
-  screen.getAllByRole('button', { name: /Открыть Чат/i })[0]
+
+const createPage = (customSteps = steps) => {
+  const page = new WidgetPage(render, Widget)
+  page.render(customSteps)
+  return page
+}
 
 describe('Flowbot widget', () => {
   it('рендерится без ошибок и показывает кнопку запуска', () => {
-    renderWidget()
+    const page = createPage()
 
-    expect(getOpenChatButton()).toBeVisible()
+    expect(page.openButton).toBeVisible()
   })
 
   it('открывает и закрывает модальное окно с чатом', async () => {
     const user = userEvent.setup()
-    renderWidget()
+    const page = createPage()
 
-    await user.click(getOpenChatButton())
+    await page.openChat(user)
     expect(
       screen.getByRole('dialog', { name: /виртуальный помощник/i }),
     ).toBeVisible()
@@ -41,13 +45,13 @@ describe('Flowbot widget', () => {
 
   it('переходит между шагами и скроллит к новым сообщениям', async () => {
     const user = userEvent.setup()
-    renderWidget()
+    const page = createPage()
 
     const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView
     const scrollSpy = vi.fn()
     window.HTMLElement.prototype.scrollIntoView = scrollSpy
 
-    await user.click(getOpenChatButton())
+    await page.openChat(user)
     await user.click(screen.getByRole('button', { name: /Начать/i }))
     expect(
       screen.getByText(/Выбери тему, которая интересует больше всего/i),
@@ -64,9 +68,9 @@ describe('Flowbot widget', () => {
 
   it('не отображает пользовательские кнопки, если шаг welcome отсутствует', async () => {
     const user = userEvent.setup()
-    renderWidget(noWelcomeSteps)
+    const page = createPage(noWelcomeSteps)
 
-    await user.click(getOpenChatButton())
+    await page.openChat(user)
     expect(
       screen.queryByRole('button', { name: /Невалидная кнопка/i }),
     ).not.toBeInTheDocument()
@@ -74,9 +78,9 @@ describe('Flowbot widget', () => {
 
   it('оставляет текущий шаг, если nextStepId указывает на несуществующий шаг', async () => {
     const user = userEvent.setup()
-    renderWidget(danglingSteps)
+    const page = createPage(danglingSteps)
 
-    await user.click(getOpenChatButton())
+    await page.openChat(user)
     const optionButton = await screen.findByRole('button', { name: /Продолжить/i })
     await user.click(optionButton)
 
