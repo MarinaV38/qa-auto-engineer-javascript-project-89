@@ -14,5 +14,10 @@ export default defineConfig({
     deps: {
       inline: ['@hexlet/chatbot-v2'],
     },
+    coverage: {
+      provider: 'v8',
+      reportsDirectory: './coverage',
+      reporter: ['text', 'html', 'lcov'],
+    },
   },
 })
