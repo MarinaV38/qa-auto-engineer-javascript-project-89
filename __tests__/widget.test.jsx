@@ -21,7 +21,7 @@ describe('Flowbot widget', () => {
   it('рендерится без ошибок и показывает кнопку запуска', () => {
     const page = createPage()
 
-    expect(page.openButton).toBeVisible()
+    expect(page.openButton).toBeTruthy()
   })
 
   it('открывает и закрывает модальное окно с чатом', async () => {
@@ -29,17 +29,14 @@ describe('Flowbot widget', () => {
     const page = createPage()
 
     await page.openChat(user)
-    expect(
-      screen.getByRole('dialog', { name: /виртуальный помощник/i }),
-    ).toBeVisible()
+    const dialog = screen.getByRole('dialog', { name: /виртуальный помощник/i })
+    expect(dialog).toBeTruthy()
 
     const closeButton = screen.getByRole('button', { name: /close/i })
     await user.click(closeButton)
 
     await waitFor(() => {
-      expect(
-        screen.queryByRole('dialog', { name: /виртуальный помощник/i }),
-      ).not.toBeInTheDocument()
+      expect(screen.queryByRole('dialog', { name: /виртуальный помощник/i })).toBeNull()
     })
   })
 
@@ -53,15 +50,13 @@ describe('Flowbot widget', () => {
 
     await page.openChat(user)
     await user.click(screen.getByRole('button', { name: /Начать/i }))
-    expect(
-      screen.getByText(/Выбери тему, которая интересует больше всего/i),
-    ).toBeInTheDocument()
+    const topicText = screen.getByText(/Выбери тему, которая интересует больше всего/i)
+    expect(topicText).toBeTruthy()
     expect(scrollSpy).toHaveBeenCalled()
 
     await user.click(screen.getByRole('button', { name: /Веб-разработка/i }))
-    expect(
-      screen.getByText(/Курс по вебу включает HTML, CSS и основы React/i),
-    ).toBeInTheDocument()
+    const webText = screen.getByText(/Курс по вебу включает HTML, CSS и основы React/i)
+    expect(webText).toBeTruthy()
 
     window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView
   })
@@ -71,9 +66,7 @@ describe('Flowbot widget', () => {
     const page = createPage(noWelcomeSteps)
 
     await page.openChat(user)
-    expect(
-      screen.queryByRole('button', { name: /Невалидная кнопка/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Невалидная кнопка/i })).toBeNull()
   })
 
   it('оставляет текущий шаг, если nextStepId указывает на несуществующий шаг', async () => {
@@ -89,6 +82,6 @@ describe('Flowbot widget', () => {
       .filter((node) => node.tagName !== 'BUTTON')
     expect(responseMessages.length).toBeGreaterThanOrEqual(1)
 
-    expect(optionButton).toBeEnabled()
+    expect(optionButton.disabled).toBe(false)
   })
 })

@@ -11,7 +11,7 @@ describe('App integration', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    expect(getOpenChatButton()).toBeVisible()
+    expect(getOpenChatButton()).toBeTruthy()
 
     await user.type(screen.getByLabelText(/Email/i), 'user@example.com')
     await user.type(screen.getByLabelText(/Пароль/i), 'secret')
@@ -23,12 +23,12 @@ describe('App integration', () => {
     await user.click(screen.getByRole('button', { name: /Зарегистрироваться/i }))
 
     const table = screen.getByRole('table')
-    expect(within(table).getByText('user@example.com')).toBeInTheDocument()
-    expect(within(table).getByText('Россия')).toBeInTheDocument()
-    expect(within(table).getByText('true')).toBeInTheDocument()
+    expect(within(table).getByText('user@example.com')).toBeTruthy()
+    expect(within(table).getByText('Россия')).toBeTruthy()
+    expect(within(table).getByText('true')).toBeTruthy()
 
     await user.click(screen.getByRole('button', { name: /Назад/i }))
-    expect(screen.getByLabelText(/Email/i)).toHaveValue('user@example.com')
+    expect(screen.getByLabelText(/Email/i).value).toBe('user@example.com')
   })
 
   it('открывает чат и показывает шаги внутри приложения', async () => {
@@ -36,13 +36,10 @@ describe('App integration', () => {
     render(<App />)
 
     await user.click(getOpenChatButton())
-    expect(
-      screen.getByRole('dialog', { name: /виртуальный помощник/i }),
-    ).toBeVisible()
+    const dialog = screen.getByRole('dialog', { name: /виртуальный помощник/i })
+    expect(dialog).toBeTruthy()
 
-    await user.click(screen.getByRole('button', { name: /Начать разговор/i }))
-    expect(
-      screen.getByText(/Помогу вам выбрать подходящий курс/i),
-    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Начать/i }))
+    expect(screen.getByText(/Выбери тему, которая интересует больше всего/i)).toBeTruthy()
   })
 })

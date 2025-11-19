@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1763474845934" clover="3.2.0">
-  <project timestamp="1763474845934" name="All files">
-    <metrics statements="31" coveredstatements="23" conditionals="8" coveredconditionals="4" methods="3" coveredmethods="2" elements="42" coveredelements="29" complexity="0" loc="31" ncloc="31" packages="3" files="5" classes="5"/>
+<coverage generated="1763561750934" clover="3.2.0">
+  <project timestamp="1763561750934" name="All files">
+    <metrics statements="31" coveredstatements="23" conditionals="8" coveredconditionals="4" methods="3" coveredmethods="2" elements="42" coveredelements="29" complexity="0" loc="31" ncloc="31" packages="3" files="6" classes="6"/>
     <package name="__fixtures__">
-      <metrics statements="3" coveredstatements="3" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+      <metrics statements="2" coveredstatements="2" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       <file name="basicSteps.js" path="/home/wife/qa-auto-engineer-javascript-project-89/__fixtures__/basicSteps.js">
-        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
-        <line num="1" count="1" type="stmt"/>
+        <metrics statements="0" coveredstatements="0" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
       </file>
       <file name="danglingSteps.js" path="/home/wife/qa-auto-engineer-javascript-project-89/__fixtures__/danglingSteps.js">
         <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
@@ -37,7 +36,7 @@
       </file>
     </package>
     <package name="src">
-      <metrics statements="15" coveredstatements="15" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
+      <metrics statements="16" coveredstatements="16" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
       <file name="App.jsx" path="/home/wife/qa-auto-engineer-javascript-project-89/src/App.jsx">
         <metrics statements="15" coveredstatements="15" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
         <line num="7" count="63" type="stmt"/>
@@ -55,6 +54,10 @@
         <line num="61" count="63" type="stmt"/>
         <line num="62" count="62" type="stmt"/>
         <line num="160" count="63" type="stmt"/>
+      </file>
+      <file name="steps.js" path="/home/wife/qa-auto-engineer-javascript-project-89/src/steps.js">
+        <metrics statements="1" coveredstatements="1" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <line num="1" count="2" type="stmt"/>
       </file>
     </package>
   </project>
