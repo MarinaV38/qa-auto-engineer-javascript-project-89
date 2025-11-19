@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest'
-import { render, screen, within } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from '../src/App.jsx'
 
@@ -41,5 +41,40 @@ describe('App integration', () => {
 
     await user.click(screen.getByRole('button', { name: /Начать/i }))
     expect(screen.getByText(/Выбери тему, которая интересует больше всего/i)).toBeTruthy()
+  })
+
+  it('передаёт шаги дочернему элементу-виджету', () => {
+    const stepsSpy = vi.fn()
+    const CustomWidget = ({ steps: receivedSteps }) => {
+      stepsSpy(receivedSteps)
+      return <div data-testid="custom-widget">Мой виджет</div>
+    }
+
+    render(
+      <App>
+        <CustomWidget />
+      </App>
+    )
+
+    expect(screen.getByTestId('custom-widget')).toBeTruthy()
+    expect(stepsSpy).toHaveBeenCalled()
+    expect(Array.isArray(stepsSpy.mock.calls.at(-1)?.[0])).toBe(true)
+  })
+
+  it('восстанавливает пользовательский виджет после ошибки благодаря WidgetErrorBoundary', async () => {
+    const ProblemWidget = () => {
+      throw new Error('boom')
+    }
+    const StableWidget = () => <div data-testid="custom-widget">stable widget</div>
+
+    const { rerender } = render(<App widget={<ProblemWidget />} />)
+
+    expect(screen.queryByTestId('custom-widget')).toBeNull()
+
+    rerender(<App widget={<StableWidget />} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('custom-widget')).toBeTruthy()
+    })
   })
 })
