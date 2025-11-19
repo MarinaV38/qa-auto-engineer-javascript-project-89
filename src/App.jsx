@@ -179,8 +179,8 @@ const App = ({ widget: widgetProp, children }) => {
 
     return (
       tryBuild(() => createElement(candidate, { steps }))
-        ?? tryBuild(() => candidate({ steps }))
-        ?? tryBuild(() => candidate(steps))
+      ?? tryBuild(() => candidate({ steps }))
+      ?? tryBuild(() => candidate(steps))
     )
   }
 
