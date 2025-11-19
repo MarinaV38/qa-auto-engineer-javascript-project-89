@@ -163,32 +163,38 @@ const App = ({ widget: widgetProp, children }) => {
     if (isValidElement(candidate)) {
       return cloneElement(candidate, { steps })
     }
-    if (typeof candidate === 'function') {
+    if (typeof candidate !== 'function') {
+      return null
+    }
+
+    const tryBuild = factory => {
       try {
-        const element = createElement(candidate, { steps })
-        if (isValidElement(element)) {
-          return element
-        }
+        const maybeElement = factory()
+        return isValidElement(maybeElement) ? maybeElement : null
       } catch {
-        // ignore and try other strategies
-      }
-      try {
-        const maybeElement = candidate({ steps })
-        if (isValidElement(maybeElement)) {
-          return maybeElement
-        }
-        return maybeElement ?? candidate(steps)
-      } catch {
-        return candidate(steps)
+        return null
       }
     }
-    return null
+
+    return (
+      tryBuild(() => createElement(candidate, { steps })) ??
+      tryBuild(() => candidate({ steps })) ??
+      tryBuild(() => candidate(steps))
+    )
   }
 
   const resolveWidget = () => {
-    const child = Array.isArray(children) ? children[0] : children
-    const injectedWidget = buildWidget(child ?? widgetProp)
-    return injectedWidget ?? Widget(steps)
+    const childCandidates = Array.isArray(children) ? children : [children]
+    const candidates = [...childCandidates, widgetProp].filter(Boolean)
+
+    for (const candidate of candidates) {
+      const widget = buildWidget(candidate)
+      if (widget) {
+        return widget
+      }
+    }
+
+    return Widget(steps)
   }
 
   return (
