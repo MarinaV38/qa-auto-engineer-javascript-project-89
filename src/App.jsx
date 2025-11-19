@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import Widget from '@hexlet/chatbot-v2'
-import '@hexlet/chatbot-v2/styles'
 import steps from './steps.js'
 
 const App = () => {
