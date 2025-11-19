@@ -39,6 +39,6 @@ export class WidgetPage {
   responseMessagesByText(text) {
     return screen
       .getAllByText(new RegExp(text, 'i'))
-      .filter((node) => node.tagName !== 'BUTTON')
+      .filter(node => node.tagName !== 'BUTTON')
   }
 }

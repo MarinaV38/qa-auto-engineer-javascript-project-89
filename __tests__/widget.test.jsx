@@ -79,7 +79,7 @@ describe('Flowbot widget', () => {
 
     const responseMessages = screen
       .getAllByText(/Продолжить/)
-      .filter((node) => node.tagName !== 'BUTTON')
+      .filter(node => node.tagName !== 'BUTTON')
     expect(responseMessages.length).toBeGreaterThanOrEqual(1)
 
     expect(optionButton.disabled).toBe(false)

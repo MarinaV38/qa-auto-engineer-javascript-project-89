@@ -1,39 +1,39 @@
-import { cloneElement, isValidElement, useState } from "react"
-import Widget from "@hexlet/chatbot-v2"
-import steps from "./steps.js"
+import { cloneElement, createElement, isValidElement, useState } from 'react'
+import Widget from '@hexlet/chatbot-v2'
+import steps from './steps.js'
 
 const App = ({ widget: widgetProp, children }) => {
   const [form, setForm] = useState({
-    email: "",
-    password: "",
-    city: "",
-    country: "",
-    address: "",
+    email: '',
+    password: '',
+    city: '',
+    country: '',
+    address: '',
     acceptRules: false,
   })
-  const [submittingState, setSubmittingState] = useState("fillingForm")
+  const [submittingState, setSubmittingState] = useState('fillingForm')
 
   const handleChangeField = ({ target }) => {
-    const value = target.type === "checkbox" ? target.checked : target.value
+    const value = target.type === 'checkbox' ? target.checked : target.value
     setForm({ ...form, [target.name]: value })
   }
 
   const handleBackToForm = () => {
-    setSubmittingState("fillingForm")
+    setSubmittingState('fillingForm')
   }
 
   const handleSubmitForm = (e) => {
     e.preventDefault()
-    setSubmittingState("submitted")
+    setSubmittingState('submitted')
   }
 
   const enToRus = {
-    email: "Email",
-    password: "Пароль",
-    city: "Город",
-    country: "Страна",
-    address: "Адрес",
-    acceptRules: "Принять правила",
+    email: 'Email',
+    password: 'Пароль',
+    city: 'Город',
+    country: 'Страна',
+    address: 'Адрес',
+    acceptRules: 'Принять правила',
   }
 
   const renderRow = key => (
@@ -156,15 +156,31 @@ const App = ({ widget: widgetProp, children }) => {
     </form>
   )
 
-  const buildWidget = (candidate) => {
+  const buildWidget = candidate => {
     if (!candidate) {
       return null
     }
     if (isValidElement(candidate)) {
       return cloneElement(candidate, { steps })
     }
-    if (typeof candidate === "function") {
-      return candidate.length > 0 ? candidate({ steps }) : candidate(steps)
+    if (typeof candidate === 'function') {
+      try {
+        const element = createElement(candidate, { steps })
+        if (isValidElement(element)) {
+          return element
+        }
+      } catch {
+        // ignore and try other strategies
+      }
+      try {
+        const maybeElement = candidate({ steps })
+        if (isValidElement(maybeElement)) {
+          return maybeElement
+        }
+        return maybeElement ?? candidate(steps)
+      } catch {
+        return candidate(steps)
+      }
     }
     return null
   }
@@ -177,7 +193,7 @@ const App = ({ widget: widgetProp, children }) => {
 
   return (
     <>
-      {submittingState === "fillingForm" ? renderForm() : renderResult()}
+      {submittingState === 'fillingForm' ? renderForm() : renderResult()}
       {resolveWidget()}
     </>
   )
