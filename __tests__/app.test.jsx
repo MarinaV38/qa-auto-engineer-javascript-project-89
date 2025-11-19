@@ -53,7 +53,7 @@ describe('App integration', () => {
     render(
       <App>
         <CustomWidget />
-      </App>
+      </App>,
     )
 
     expect(screen.getByTestId('custom-widget')).toBeTruthy()
