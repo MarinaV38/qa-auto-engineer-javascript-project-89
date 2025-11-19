@@ -156,7 +156,7 @@ const App = ({ widget: widgetProp, children }) => {
     </form>
   )
 
-  const buildWidget = candidate => {
+  const buildWidget = (candidate) => {
     if (!candidate) {
       return null
     }
@@ -167,19 +167,20 @@ const App = ({ widget: widgetProp, children }) => {
       return null
     }
 
-    const tryBuild = factory => {
+    const tryBuild = (factory) => {
       try {
         const maybeElement = factory()
         return isValidElement(maybeElement) ? maybeElement : null
-      } catch {
+      }
+      catch {
         return null
       }
     }
 
     return (
-      tryBuild(() => createElement(candidate, { steps })) ??
-      tryBuild(() => candidate({ steps })) ??
-      tryBuild(() => candidate(steps))
+      tryBuild(() => createElement(candidate, { steps }))
+        ?? tryBuild(() => candidate({ steps }))
+        ?? tryBuild(() => candidate(steps))
     )
   }
 
