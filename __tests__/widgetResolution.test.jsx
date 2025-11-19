@@ -57,7 +57,7 @@ describe('App widget resolution edge cases', () => {
         }
         return null
       },
-      { __forceFactory: true }
+      { __forceFactory: true },
     )
 
     await renderFreshApp({ widget: widgetFactory }, { mockReact })
