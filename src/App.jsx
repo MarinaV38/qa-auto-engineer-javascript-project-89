@@ -189,18 +189,34 @@ const App = ({ widget: widgetProp, children }) => {
     const candidates = [...childCandidates, widgetProp].filter(Boolean)
 
     for (const candidate of candidates) {
-      const widget = buildWidget(candidate)
-      if (widget) {
-        return widget
+      try {
+        const widget = buildWidget(candidate)
+        if (widget) {
+          return widget
+        }
+      }
+      catch {
+        // ignore candidate errors and try next option
       }
     }
 
     return Widget(steps)
   }
 
-  const widgetElement = resolveWidget()
   const fallbackWidget = Widget(steps)
-  const boundaryKey = widgetElement?.type ?? widgetElement ?? 'fallback'
+
+  const safeWidgetElement = (() => {
+    try {
+      const resolved = resolveWidget()
+      return isValidElement(resolved) ? resolved : null
+    }
+    catch {
+      return null
+    }
+  })()
+
+  const widgetElement = safeWidgetElement ?? fallbackWidget
+  const boundaryKey = safeWidgetElement?.type ?? 'fallback'
 
   return (
     <>
