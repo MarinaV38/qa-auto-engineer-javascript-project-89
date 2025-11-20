@@ -17,3 +17,6 @@
 - Сборка: `npm run build`
 - Тесты: `npm test` (или `npm test -- --run`)
 - Линтер: `npm run lint`
+
+## Пример работы тестов
+[![asciicast](https://asciinema.org/a/M6RUY1xq7KglRX9x8vecNpj20.svg)](https://asciinema.org/a/M6RUY1xq7KglRX9x8vecNpj20)
