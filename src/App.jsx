@@ -1,6 +1,7 @@
-import { cloneElement, createElement, isValidElement, useState, Component } from 'react'
+import { cloneElement, createElement, isValidElement, useState } from 'react'
 import Widget from '@hexlet/chatbot-v2'
 import steps from './steps.js'
+import WidgetErrorBoundary from './components/WidgetErrorBoundary.jsx'
 
 const App = ({ widget: widgetProp, children }) => {
   const [form, setForm] = useState({
@@ -229,28 +230,3 @@ const App = ({ widget: widgetProp, children }) => {
 }
 
 export default App
-
-class WidgetErrorBoundary extends Component {
-  constructor(props) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true }
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
-      this.setState({ hasError: false })
-    }
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return this.props.fallback
-    }
-
-    return this.props.children
-  }
-}

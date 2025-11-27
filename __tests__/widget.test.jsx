@@ -17,7 +17,7 @@ const createPage = (customSteps = steps) => {
   return page
 }
 
-describe('Flowbot widget', () => {
+describe('Виджет Flowbot', () => {
   it('рендерится без ошибок и показывает кнопку запуска', () => {
     const page = createPage()
 
@@ -29,14 +29,11 @@ describe('Flowbot widget', () => {
     const page = createPage()
 
     await page.openChat(user)
-    const dialog = screen.getByRole('dialog', { name: /виртуальный помощник/i })
-    expect(dialog).toBeTruthy()
+    expect(page.isChatOpen()).toBe(true)
 
-    const closeButton = screen.getByRole('button', { name: /close/i })
-    await user.click(closeButton)
-
+    await page.closeChat(user)
     await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: /виртуальный помощник/i })).toBeNull()
+      expect(page.isChatOpen()).toBe(false)
     })
   })
 
@@ -49,14 +46,12 @@ describe('Flowbot widget', () => {
     window.HTMLElement.prototype.scrollIntoView = scrollSpy
 
     await page.openChat(user)
-    await user.click(screen.getByRole('button', { name: /Начать/i }))
-    const topicText = screen.getByText(/Выбери тему, которая интересует больше всего/i)
-    expect(topicText).toBeTruthy()
+    await page.startChat(user)
+    expect(page.messageExists('Выбери тему, которая интересует больше всего')).toBe(true)
     expect(scrollSpy).toHaveBeenCalled()
 
-    await user.click(screen.getByRole('button', { name: /Веб-разработка/i }))
-    const webText = screen.getByText(/Курс по вебу включает HTML, CSS и основы React/i)
-    expect(webText).toBeTruthy()
+    await page.chooseOption(user, 'Веб-разработка')
+    expect(page.messageExists('Курс по вебу включает HTML, CSS и основы React')).toBe(true)
 
     window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView
   })
@@ -66,7 +61,7 @@ describe('Flowbot widget', () => {
     const page = createPage(noWelcomeSteps)
 
     await page.openChat(user)
-    expect(screen.queryByRole('button', { name: /Невалидная кнопка/i })).toBeNull()
+    expect(page.messageExists('Невалидная кнопка')).toBe(false)
   })
 
   it('оставляет текущий шаг, если nextStepId указывает на несуществующий шаг', async () => {
@@ -77,9 +72,7 @@ describe('Flowbot widget', () => {
     const optionButton = await screen.findByRole('button', { name: /Продолжить/i })
     await user.click(optionButton)
 
-    const responseMessages = screen
-      .getAllByText(/Продолжить/)
-      .filter(node => node.tagName !== 'BUTTON')
+    const responseMessages = page.responseMessagesByText('Продолжить')
     expect(responseMessages.length).toBeGreaterThanOrEqual(1)
 
     expect(optionButton.disabled).toBe(false)

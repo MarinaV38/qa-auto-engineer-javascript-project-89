@@ -22,18 +22,28 @@ export class WidgetPage {
     return screen.queryByRole('dialog', { name: /виртуальный помощник/i })
   }
 
-  get chatArea() {
-    return this.dialog?.querySelector('#chat') ?? null
+  async startChat(user) {
+    const startButton = screen.getByRole('button', { name: /Начать/i })
+    await user.click(startButton)
   }
 
-  get chatButtons() {
-    return Array.from(this.chatArea?.querySelectorAll('button') ?? [])
-  }
-
-  async clickOption(user, label) {
+  async chooseOption(user, label) {
     const button = screen.getByRole('button', { name: new RegExp(label, 'i') })
     await user.click(button)
     return button
+  }
+
+  async closeChat(user) {
+    const closeButton = screen.getByRole('button', { name: /close/i })
+    await user.click(closeButton)
+  }
+
+  isChatOpen() {
+    return Boolean(this.dialog)
+  }
+
+  messageExists(text) {
+    return Boolean(screen.queryByText(new RegExp(text, 'i')))
   }
 
   responseMessagesByText(text) {

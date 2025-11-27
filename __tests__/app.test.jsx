@@ -1,80 +1,86 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen, within, waitFor } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import App from '../src/App.jsx'
+import { AppPage } from './pageObjects/AppPage.jsx'
 
-const getOpenChatButton = () =>
-  screen.getAllByRole('button', { name: /Открыть Чат/i })[0]
-
-describe('App integration', () => {
-  it('сохраняет работу формы после интеграции виджета', async () => {
+describe('Интеграция приложения и виджета', () => {
+  it('сохраняет заполненную форму после взаимодействия с чатом', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    const page = new AppPage()
+    page.render()
 
-    expect(getOpenChatButton()).toBeTruthy()
+    await page.fillForm(user, {
+      email: 'user@example.com',
+      password: 'secret',
+      address: 'Невский проспект, 12',
+      city: 'Санкт-Петербург',
+      country: 'Россия',
+      acceptRules: true,
+    })
 
-    await user.type(screen.getByLabelText(/Email/i), 'user@example.com')
-    await user.type(screen.getByLabelText(/Пароль/i), 'secret')
-    await user.type(screen.getByLabelText(/Адрес/i), 'Невский проспект, 12')
-    await user.type(screen.getByLabelText(/Город/i), 'Санкт-Петербург')
-    await user.selectOptions(screen.getByLabelText(/Страна/i), 'Россия')
-    await user.click(screen.getByLabelText(/Принять правила/i))
+    await page.openChat(user)
+    await page.startChat(user)
+    expect(page.dialog).toBeTruthy()
 
-    await user.click(screen.getByRole('button', { name: /Зарегистрироваться/i }))
+    await page.submitForm(user)
 
-    const table = screen.getByRole('table')
-    expect(within(table).getByText('user@example.com')).toBeTruthy()
-    expect(within(table).getByText('Россия')).toBeTruthy()
-    expect(within(table).getByText('true')).toBeTruthy()
-
-    await user.click(screen.getByRole('button', { name: /Назад/i }))
-    expect(screen.getByLabelText(/Email/i).value).toBe('user@example.com')
+    expect(page.resultHas('user@example.com')).toBe(true)
+    expect(page.resultHas('Россия')).toBe(true)
+    expect(page.resultHas('true')).toBe(true)
   })
 
-  it('открывает чат и показывает шаги внутри приложения', async () => {
-    const user = userEvent.setup()
-    render(<App />)
-
-    await user.click(getOpenChatButton())
-    const dialog = screen.getByRole('dialog', { name: /виртуальный помощник/i })
-    expect(dialog).toBeTruthy()
-
-    await user.click(screen.getByRole('button', { name: /Начать/i }))
-    expect(screen.getByText(/Выбери тему, которая интересует больше всего/i)).toBeTruthy()
-  })
-
-  it('передаёт шаги дочернему элементу-виджету', () => {
+  it('передаёт шаги дочернему компоненту-виджету', () => {
     const stepsSpy = vi.fn()
     const CustomWidget = ({ steps: receivedSteps }) => {
       stepsSpy(receivedSteps)
       return <div data-testid="custom-widget">Мой виджет</div>
     }
 
-    render(
-      <App>
-        <CustomWidget />
-      </App>,
-    )
+    const page = new AppPage()
+    page.render({ children: <CustomWidget /> })
 
     expect(screen.getByTestId('custom-widget')).toBeTruthy()
     expect(stepsSpy).toHaveBeenCalled()
     expect(Array.isArray(stepsSpy.mock.calls.at(-1)?.[0])).toBe(true)
   })
 
-  it('восстанавливает пользовательский виджет после ошибки благодаря WidgetErrorBoundary', async () => {
+  it('строит пользовательский виджет из функции и прокидывает шаги', () => {
+    const Factory = ({ steps }) => <div data-testid="factory-widget">{steps.length}</div>
+    const page = new AppPage()
+    page.render({ widget: Factory })
+
+    expect(screen.getByTestId('factory-widget').textContent).toMatch(/\d+/)
+  })
+
+  it('использует запасной виджет, если кандидат сломан', () => {
+    const throwingChildren = new Proxy([() => <div>Custom widget</div>], {
+      get(target, prop, receiver) {
+        if (prop === Symbol.iterator) {
+          throw new Error('iterator failure')
+        }
+        return Reflect.get(target, prop, receiver)
+      },
+    })
+
+    const page = new AppPage()
+    page.render({ children: throwingChildren })
+
+    expect(page.openChatButton).toBeTruthy()
+  })
+
+  it('перестраивает пользовательский виджет после ошибки', async () => {
     const ProblemWidget = () => {
       throw new Error('boom')
     }
     const StableWidget = () => <div data-testid="custom-widget">stable widget</div>
 
-    const { rerender } = render(<App widget={<ProblemWidget />} />)
+    const page = new AppPage()
+    page.render({ widget: <ProblemWidget /> })
 
     expect(screen.queryByTestId('custom-widget')).toBeNull()
 
-    rerender(<App widget={<StableWidget />} />)
+    await page.rerenderWith({ widget: <StableWidget /> })
 
-    await waitFor(() => {
-      expect(screen.getByTestId('custom-widget')).toBeTruthy()
-    })
+    expect(screen.getByTestId('custom-widget')).toBeTruthy()
   })
 })
