@@ -38,7 +38,6 @@ describe('Интеграция приложения и виджета', () => {
     }
 
     render(<App><CustomWidget /></App>)
-    const page = new AppPage()
 
     expect(screen.getByTestId('custom-widget')).toBeTruthy()
     expect(stepsSpy).toHaveBeenCalled()
@@ -48,7 +47,6 @@ describe('Интеграция приложения и виджета', () => {
   it('строит пользовательский виджет из функции и прокидывает шаги', () => {
     const Factory = ({ steps }) => <div data-testid="factory-widget">{steps.length}</div>
     render(<App widget={Factory} />)
-    const page = new AppPage()
 
     expect(screen.getByTestId('factory-widget').textContent).toMatch(/\d+/)
   })
