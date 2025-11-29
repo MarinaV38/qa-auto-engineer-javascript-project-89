@@ -1,20 +1,17 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createRequire } from 'module'
 import steps from '../__fixtures__/basicSteps.js'
 import noWelcomeSteps from '../__fixtures__/noWelcomeSteps.js'
 import danglingSteps from '../__fixtures__/danglingSteps.js'
 import { WidgetPage } from './pageObjects/WidgetPage.js'
+import WidgetModule from '@hexlet/chatbot-v2'
 
-const require = createRequire(import.meta.url)
-const WidgetModule = require('@hexlet/chatbot-v2')
 const Widget = WidgetModule.default ?? WidgetModule
 
 const createPage = (customSteps = steps) => {
-  const page = new WidgetPage(render, Widget)
-  page.render(customSteps)
-  return page
+  render(Widget(customSteps))
+  return new WidgetPage()
 }
 
 describe('Виджет Flowbot', () => {

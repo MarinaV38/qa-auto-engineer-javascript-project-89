@@ -1,15 +1,6 @@
 import { screen } from '@testing-library/react'
 
 export class WidgetPage {
-  constructor(renderFn, widgetFactory) {
-    this.renderFn = renderFn
-    this.widgetFactory = widgetFactory
-  }
-
-  render(steps) {
-    this.renderFn(this.widgetFactory(steps))
-  }
-
   get openButton() {
     return screen.getAllByRole('button', { name: /Открыть Чат/i })[0]
   }

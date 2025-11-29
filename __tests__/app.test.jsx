@@ -1,13 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
-import { screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { AppPage } from './pageObjects/AppPage.jsx'
+import App from '../src/App.jsx'
 
 describe('Интеграция приложения и виджета', () => {
   it('сохраняет заполненную форму после взаимодействия с чатом', async () => {
     const user = userEvent.setup()
+    render(<App />)
     const page = new AppPage()
-    page.render()
 
     await page.fillForm(user, {
       email: 'user@example.com',
@@ -36,8 +37,8 @@ describe('Интеграция приложения и виджета', () => {
       return <div data-testid="custom-widget">Мой виджет</div>
     }
 
+    render(<App><CustomWidget /></App>)
     const page = new AppPage()
-    page.render({ children: <CustomWidget /> })
 
     expect(screen.getByTestId('custom-widget')).toBeTruthy()
     expect(stepsSpy).toHaveBeenCalled()
@@ -46,8 +47,8 @@ describe('Интеграция приложения и виджета', () => {
 
   it('строит пользовательский виджет из функции и прокидывает шаги', () => {
     const Factory = ({ steps }) => <div data-testid="factory-widget">{steps.length}</div>
+    render(<App widget={Factory} />)
     const page = new AppPage()
-    page.render({ widget: Factory })
 
     expect(screen.getByTestId('factory-widget').textContent).toMatch(/\d+/)
   })
@@ -62,8 +63,8 @@ describe('Интеграция приложения и виджета', () => {
       },
     })
 
+    render(<App>{throwingChildren}</App>)
     const page = new AppPage()
-    page.render({ children: throwingChildren })
 
     expect(page.openChatButton).toBeTruthy()
   })
@@ -74,12 +75,13 @@ describe('Интеграция приложения и виджета', () => {
     }
     const StableWidget = () => <div data-testid="custom-widget">stable widget</div>
 
+    const { rerender } = render(<App widget={<ProblemWidget />} />)
     const page = new AppPage()
-    page.render({ widget: <ProblemWidget /> })
+    page.setRerender(rerender)
 
     expect(screen.queryByTestId('custom-widget')).toBeNull()
 
-    await page.rerenderWith({ widget: <StableWidget /> })
+    page.rerender(<App widget={<StableWidget />} />)
 
     expect(screen.getByTestId('custom-widget')).toBeTruthy()
   })

@@ -1,12 +1,6 @@
-import { render, screen } from '@testing-library/react'
-import App from '../../src/App.jsx'
+import { screen } from '@testing-library/react'
 
 export class AppPage {
-  render(props = {}) {
-    const utils = render(<App {...props} />)
-    this.rerender = utils.rerender
-  }
-
   get openChatButton() {
     return screen.getAllByRole('button', { name: /Открыть Чат/i })[0]
   }
@@ -62,10 +56,14 @@ export class AppPage {
     return Boolean(screen.queryByText(text))
   }
 
-  async rerenderWith(props) {
-    if (!this.rerender) {
-      throw new Error('render must be called before rerender')
+  setRerender(fn) {
+    this.rerenderFn = fn
+  }
+
+  rerender(element) {
+    if (!this.rerenderFn) {
+      throw new Error('Rerender is not attached')
     }
-    this.rerender(<App {...props} />)
+    this.rerenderFn(element)
   }
 }
